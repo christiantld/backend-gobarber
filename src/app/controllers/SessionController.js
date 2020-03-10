@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import * as Yup from 'yup';
 import User from '../models/Users';
+import File from '../models/Files';
 import authConfig from '../../config/authConfig';
 
 class SessionController {
@@ -22,6 +23,13 @@ class SessionController {
       where: {
         email,
       },
+      include: [
+        {
+          model: File,
+          as: 'avatar',
+          attributes: ['id', 'path', 'url'],
+        },
+      ],
     });
 
     if (!user) {
@@ -36,13 +44,15 @@ class SessionController {
       });
     }
 
-    const { id, name } = user;
+    const { id, name, avatar, provider } = user;
 
     return res.json({
       user: {
         id,
         name,
         email,
+        provider,
+        avatar,
       },
       token: jwt.sign(
         {
